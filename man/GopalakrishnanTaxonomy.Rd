@@ -3,7 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \docType{data}
 \title{
-  Taxonomy table for the Gopalakrishnan dataset
+   Gopalakrishnan dataset taxonomy table
 }
 \description{Taxonomy table for the Gopalakrishnan dataset.}
 \source{

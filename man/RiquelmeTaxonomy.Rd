@@ -2,7 +2,7 @@
 \alias{RiquelmeTaxonomy}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-  Taxonomy table for the Riquelme dataset
+  Riquelme dataset taxonomy table
 }
 
 \description{

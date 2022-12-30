@@ -2,7 +2,7 @@
 \alias{RiquelmeMeta}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-  Meta data for the Riquelme dataset
+  Riquelme dataset meta data
 }
 \description{
 This dataset contains the survival information of the Riquelme dataset. The survival time in months and the event indicator (All ones in this case as pancreatic cancer patients tend to have shorter survival time).

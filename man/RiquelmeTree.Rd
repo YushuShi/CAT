@@ -2,7 +2,7 @@
 \alias{RiquelmeTree}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-  Tree information for the Riquelme dataset
+  Riquelme dataset tree information
 }
 
 \description{

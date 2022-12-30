@@ -2,7 +2,7 @@
 \alias{GopalakrishnanTree}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-  Tree information for the Gopalakrishnan dataset
+  Gopalakrishnan dataset tree information
 }
 \description{Tree information for the Gopalakrishnan dataset.}
 \source{

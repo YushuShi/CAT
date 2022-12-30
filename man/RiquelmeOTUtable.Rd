@@ -1,7 +1,7 @@
 \name{RiquelmeOTUtable}
 \alias{RiquelmeOTUtable}
 \title{
-  OTU table for the Riquelme dataset
+  Riquelme dataset OTU table
 }
 
 \description{

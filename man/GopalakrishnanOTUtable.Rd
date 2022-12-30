@@ -2,7 +2,7 @@
 \alias{GopalakrishnanOTUtable}
 \docType{data}
 \title{
-  OTU table for the Gopalakrishnan dataset
+  Gopalakrishnan dataset OTU table
 }
 \description{OTU table for the Gopalakrishnan dataset.}
 \source{
