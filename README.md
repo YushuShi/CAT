@@ -20,7 +20,7 @@ numBS=1000,parallel=TRUE,nCore=2)
 * **outcomeVar** The outcome variable in metaData. If it is a vector of two elements, the function will consider the outcome is time-to-event (for now only compatible with MiRKAT) and use the first element in the list as the time variable and the second element in the list as the event indicator. For now it only accepts right censored data.
 * **tree** An object of the class "tree", which is needed for calculating weighted and unweighted UniFrac distances.
 * **method** Can be "PERMANOVA" or "MiRKAT". The default choice is "PERMANOVA".
-* **nperm** Number of permutations used in the test. The default is 9999.
+* **numBS** Number of bootstrap samples used in the test. The default is 1000.
 * **parallel** Whether or not use parallel computing.
 * **nCore** How many cores to use for parallel computing. This is only relevant when parallel=TRUE.
 
