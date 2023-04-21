@@ -119,6 +119,7 @@ CAT<-function(testList,otutable,taxonomy,metric="Weighted UniFrac",metaData,outc
     }
   }
   rownames(testResult)<-testList
+  colnames(testResult)<-c("One_sided_p_value","Two_sided_p_value")
   testResult
 }
 
