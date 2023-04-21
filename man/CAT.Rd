@@ -9,7 +9,7 @@ Conditional association test for microbiome data using a permutation-based appro
 \usage{CAT(testList,otutable,taxonomy,
 metric="Weighted UniFrac",metaData,
 outcomeVar,tree=NULL,method="PERMANOVA",
-nperm=9999,parallel=TRUE,nCore=2)
+numBS=1000,parallel=TRUE,nCore=2)
 }
 \arguments{
   \item{testList}{A list of taxa to be tested.}
@@ -20,7 +20,7 @@ nperm=9999,parallel=TRUE,nCore=2)
   \item{outcomeVar}{The outcome variable in metaData. If it is a vector of two elements, the function will consider the outcome is time-to-event (for now only compatible with MiRKAT) and use the first element in the list as the time variable and the second element in the list as the event indicator. For now it only accepts right censored data.}
   \item{tree}{An object of the class "tree", which is needed for calculating weighted and unweighted UniFrac distances.}
   \item{method}{Can be "PERMANOVA" or "MiRKAT". The default choice is "PERMANOVA".}
-  \item{nperm}{Number of permutations used in the test. The default is 9999.}
+  \item{numBS}{Number of bootstrap samples used in the test. The default is 1000}
   \item{parallel}{Whether or not use parallel computing.}
   \item{nCore}{How many cores to use for parallel computing. This is only relevant when parallel=TRUE.}
 }
@@ -60,20 +60,20 @@ testList<-c("p__Firmicutes",
 
 testResult<-CAT(testList,otutable,taxonomy,
 metric="Weighted UniFrac",metaData,outcomeVar="ContOutcomes",
-tree,nperm=9999,parallel=TRUE,nCore=2)
+tree,numBS=1000,parallel=TRUE,nCore=2)
 testResult
 testResult<-CAT(testList,otutable,taxonomy,
 metric="Weighted UniFrac",metaData,outcomeVar="ContOutcomes",
-tree,nperm=9999,parallel=FALSE)
+tree,numBS=1000,parallel=FALSE)
 testResult
 
 testResult<-CAT(testList,otutable,taxonomy,
 metric="Weighted UniFrac",metaData,outcomeVar="BinOutcomes",
-tree,nperm=9999,parallel=TRUE,nCore=2)
+tree,numBS=1000,parallel=TRUE,nCore=2)
 testResult
 testResult<-CAT(testList,otutable,taxonomy,
 metric="Weighted UniFrac",metaData,outcomeVar="BinOutcomes",
-tree,nperm=9999,parallel=FALSE)
+tree,numBS=1000,parallel=FALSE)
 testResult
 
 #Example 2 with survival outcomes

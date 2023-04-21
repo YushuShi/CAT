@@ -1,10 +1,9 @@
 # source("compDist.R")
+# source("MiRKATR2.R")
 # source("compDistList.R")
 # source("paraCAT.R")
 # source("paraCATMiRKAT.R")
-CAT<-function(testList,otutable,taxonomy,metric="Weighted UniFrac",metaData,outcomeVar,tree=NULL,method="PERMANOVA",nperm=9999,parallel=TRUE,nCore=2){
-  testResult<-rep(NA,length(testList))
-
+CAT<-function(testList,otutable,taxonomy,metric="Weighted UniFrac",metaData,outcomeVar,tree=NULL,method="PERMANOVA",numBS=1000, parallel=TRUE,nCore=2){
   if(is.null(tree)){
     if(sum(metric%in%c("WeightUniFrac","Unweighted UniFrac","robust"))>0){
       stop("UniFrac distance needs a tree!")
@@ -51,87 +50,76 @@ CAT<-function(testList,otutable,taxonomy,metric="Weighted UniFrac",metaData,outc
         rownames(padding)<-tree$tip.label[!(tree$tip.label%in% rownames(taxonomy))]
         colnames(padding)<-colnames(taxonomy)
         taxonomy<-rbind(taxonomy,padding)
+        }
       }
-    }
     }
   otutable<-otutable[,rownames(metaData)]
   taxonomy<-taxonomy[rownames(otutable),]
-
+  testResult<-NA
+  
   if(method=="PERMANOVA"){
     distMat<-compDist(otutable,metric,tree)
-    suppressMessages(distResult<-adonis(distMat~metaData[,outcomeVar],permutations = nperm)$aov.tab)
-    origpValue<-distResult[1,6]
-    
+    suppressMessages(distResult<-adonis(distMat~metaData[,outcomeVar],permutations = 1)$aov.tab)
+    origR2<-distResult$R2[1]
+    origBS<-rep(NA,numBS)
+    for(BSiter in 1:numBS){
+      indi<-sample(1:nrow(metaData),nrow(metaData),replace = TRUE)
+      outcomeBS<-metaData[indi,outcomeVar]
+      distMatBS<-as.matrix(distMat)
+      distMatMatrix<-as.matrix(distMat)
+      for(i in 1:length(outcomeBS)){
+        for(j in 1:length(outcomeBS)){
+          distMatBS[i,j]<-distMatMatrix[indi[i],indi[j]]
+        }
+      }
+    suppressMessages(resultBS<-adonis(distMatBS~outcomeBS,permutations = 1)$aov.tab)
+    origBS[BSiter]<-resultBS$R2[1]
+    }
     if(parallel){
       registerDoParallel(nCore)
-      testResult<-foreach(seedNum=1:length(testList),.combine='c',
+      testResult<-foreach(testIter=1:length(testList),.combine='rbind',
                           .packages=c("ape","vegan","GUniFrac")
-      ) %dopar% paraCAT(seedNum,testList,otutable,taxonomy,metric,metaData,outcomeVar,nperm,
-                        origpValue,tree)
+      ) %dopar% paraCAT(testIter,testList,otutable,taxonomy,metric,metaData,outcomeVar,numBS,origR2,origBS,tree)
       stopImplicitCluster()
     }else{
-      for(j in 1:length(testList)){
-        otutemp<-otutable
-        otuUnder<-rownames(otutable)[apply(taxonomy, 1, function(x) sum(any(x %in% testList[j])))>0] 
-        otutemp[otuUnder,]<-0
-        distMat<-compDist(otutemp,metric,tree)
-        suppressMessages(distResult<-adonis(distMat~metaData[,outcomeVar],permutations = nperm)$aov.tab)
-        catpValue<-distResult[1,6]
-        testResult[j]<-prop.test(c(origpValue*(nperm+1),catpValue*(nperm+1)),rep(nperm+1,2))$p.value
+      testResult<-NULL
+      for(testIter in 1:length(testList)){
+        testResult<-rbind(testResult,paraCAT(testIter,testList,otutable,taxonomy,metric,metaData,outcomeVar,numBS,origR2,origBS,tree))
       }
     }
   }else{
     Ks<-compDistList(otutable,metric,tree)
-    temp<-NA
-    if(length(outcomeVar)>1){
-      temp<-MiRKATS(obstime = metaData[,outcomeVar[1]], delta = metaData[,outcomeVar[2]], Ks = Ks,
-                    perm = TRUE, omnibus="permutation", nperm=nperm)
-    }else{
-      if(length(table(metaData[,outcomeVar]))==2){
-        temp<-MiRKAT(metaData[,outcomeVar], Ks = Ks, method="permutation",
-                     out_type="D",
-                     omnibus="permutation", nperm=nperm)      
-      }else{
-        temp<-MiRKAT(metaData[,outcomeVar], Ks = Ks,
-                     omnibus="permutation", nperm=nperm)  
-      } 
-    }
-
-    origpValue<-temp$omnibus_p 
-    if(parallel){
-      registerDoParallel(nCore)
-      testResult<-foreach(seedNum=1:length(testList),.combine='c',
-                          .packages=c("ape","vegan","GUniFrac","MiRKAT")
-      ) %dopar% paraCATMiRKAT(seedNum,testList,otutable,taxonomy,metric,metaData,outcomeVar,nperm,
-                        origpValue,tree)
-      stopImplicitCluster()
-    }else{
-      for(j in 1:length(testList)){
-        otutemp<-otutable
-        otuUnder<-rownames(otutable)[apply(taxonomy, 1, function(x) sum(any(x %in% testList[j])))>0] 
-        otutemp[otuUnder,]<-0
-        Ks<-compDistList(otutemp,metric,tree)
-        temp<-NA
-        if(length(outcomeVar)>1){
-          temp<-MiRKATS(obstime = metaData[,outcomeVar[1]], delta = metaData[,outcomeVar[2]], Ks = Ks,
-                        perm = TRUE, omnibus="permutation", nperm=nperm)
-        }else{
-          if(length(table(metaData[,outcomeVar]))==2){
-            temp<-MiRKAT(metaData[,outcomeVar], Ks = Ks, method="permutation",
-                         out_type="D",
-                                omnibus="permutation", nperm=nperm)      
-          }else{
-            temp<-MiRKAT(metaData[,outcomeVar], Ks = Ks,
-                         omnibus="permutation", nperm=nperm)  
+    origR2<-MiRKATR2(metaData,outcomeVar,Ks)
+    origBS<-rep(NA,numBS)
+    for(BSiter in 1:numBS){
+      indi<-sample(1:nrow(metaData),nrow(metaData),replace = TRUE)
+      outcomeBS<-metaData[indi,outcomeVar]
+      KsBS<-Ks
+      temp<-NA
+      for(k in 1:length(Ks)){
+        for(i in 1:length(outcomeBS)){
+          for(j in 1:length(outcomeBS)){
+            KsBS[[k]][i,j]<-Ks[[k]][indi[i],indi[j]]
           }
         }
-        catpValue<-temp$omnibus_p 
-        testResult[j]<-prop.test(c(origpValue*(nperm+1),catpValue*(nperm+1)),rep(nperm+1,2))$p.value
+      }
+      origBS[BSiter]<-MiRKATR2(outcomeBS,outcomeVar,KsBS)
+    }
+    if(parallel){
+      registerDoParallel(nCore)
+      testResult<-foreach(seedNum=1:length(testList),.combine='rbind',
+                          .packages=c("ape","vegan","GUniFrac","MiRKAT")
+      ) %dopar% paraCATMiRKAT(seedNum,testList,otutable,taxonomy,metric,metaData,outcomeVar,numBS,origR2,origBS,tree)
+      stopImplicitCluster()
+    }else{
+      testResult<-NULL
+      for(testIter in 1:length(testList)){
+        testResult<-rbind(testResult,paraCATMiRKAT(testIter,testList,otutable,taxonomy,metric,metaData,outcomeVar,numBS,origR2,origBS,tree))
       }
     }
   }
+  rownames(testResult)<-testList
   testResult
 }
-  
 
 
