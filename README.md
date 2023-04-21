@@ -32,7 +32,7 @@ A matrix of one-sided and two-sided p-values for the taxa list given.
 CAT implements a novel conditional association test, which can account for other features and phylogenetic relatedness when testing the association between a feature and an outcome. CAT adopts a leave-out method, measuring the importance of a feature in predicting the outcome by removing that feature from the data and quantifying how the association with the outcome is weakened through a z-test. By pairing with PERMANOVA and MiRKAT-based methods, the package allows association testing for continuous, binary, and survival outcomes.
 
 ## Reference
-Shi Y, Zhang L, Do KA, Jenq RR, Peterson CB (2022) _CAT: a conditional association test for microbiome data using a permutation-based approach_
+Shi Y, Zhang L, Do KA, Jenq RR, Peterson CB (2022) _CAT: a conditional association test for microbiome data using a leave_out approach
 
 ## Note
 
